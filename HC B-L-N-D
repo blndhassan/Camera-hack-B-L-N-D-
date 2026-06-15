@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width,
+initial-scale=1.0,
+user-scalable=no">
+
+<title>B-L-N-D ULTRA MATRIX</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<style>
+
+:root{
+--neon:#00ff41;
+--danger:#ff003c;
+--bg:#000;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:monospace;
+}
+
+html,body{
+width:100%;
+height:100%;
+overflow:hidden;
+background:#000;
+color:var(--neon);
+}
+
+/* LOGIN */
+
+#login{
+
+position:fixed;
+inset:0;
+background:#000;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:99999;
+
+}
+
+.login-box{
+
+width:90%;
+max-width:350px;
+
+padding:25px;
+
+border:2px solid var(--neon);
+
+background:rgba(0,0,0,.95);
+
+box-shadow:0 0 25px var(--neon);
+
+text-align:center;
+
+}
+
+.login-box h1{
+
+font-size:32px;
+letter-spacing:5px;
+
+}
+
+.login-box p{
+
+margin-top:5px;
+font-size:11px;
+
+}
+
+input{
+
+width:100%;
+
+padding:12px;
+
+margin-top:15px;
+
+background:#000;
+
+border:1px solid var(--neon);
+
+color:var(--neon);
+
+text-align:center;
+
+font-size:18px;
+
+outline:none;
+
+}
+
+button{
+
+background:#000;
+
+border:1px solid var(--neon);
+
+color:var(--neon);
+
+padding:10px;
+
+margin-top:6px;
+
+cursor:pointer;
+
+font-size:12px;
+
+}
+
+button:hover{
+
+background:var(--neon);
+color:#000;
+
+}
+
+.contact{
+
+margin-top:15px;
+
+font-size:11px;
+
+line-height:1.8;
+
+}
+
+/* VIDEO */
+
+#video{
+
+position:fixed;
+
+top:0;
+left:0;
+
+width:100vw;
+height:100vh;
+
+object-fit:cover;
+
+z-index:1;
+
+}
+
+/* CANVAS */
+
+canvas{
+
+position:fixed;
+
+top:0;
+left:0;
+
+width:100vw;
+height:100vh;
+
+pointer-events:none;
+
+z-index:2;
+
+}
+
+/* HUD */
+
+#hud{
+
+position:fixed;
+
+top:10px;
+left:10px;
+
+width:140px;
+
+padding:7px;
+
+background:rgba(0,0,0,.8);
+
+border:1px solid var(--neon);
+
+font-size:10px;
+
+z-index:100;
+
+}
+
+/* TERMINAL */
+
+#terminal{
+
+position:fixed;
+
+top:10px;
+right:10px;
+
+width:150px;
+height:120px;
+
+overflow:auto;
+
+background:rgba(0,0,0,.85);
+
+border:1px solid var(--neon);
+
+padding:5px;
+
+font-size:8px;
+
+z-index:100;
+
+}
+
+/* RADAR */
+
+#radar{
+
+position:fixed;
+
+left:10px;
+bottom:190px;
+
+width:80px;
+height:80px;
+
+border:2px solid var(--neon);
+
+border-radius:50%;
+
+overflow:hidden;
+
+background:rgba(0,20,0,.3);
+
+z-index:100;
+
+}
+
+#radar::before{
+
+content:'';
+
+position:absolute;
+
+width:100%;
+height:100%;
+
+background:linear-gradient(
+90deg,
+rgba(0,255,65,.5),
+transparent
+);
+
+animation:spin 2s linear infinite;
+
+}
+
+@keyframes spin{
+
+from{
+transform:rotate(0deg)
+}
+
+to{
+transform:rotate(360deg)
+}
+
+}
+
+/* SCAN */
+
+#scan{
+
+position:fixed;
+
+width:100%;
+height:3px;
+
+background:var(--neon);
+
+opacity:.3;
+
+animation:scan 3s linear infinite;
+
+z-index:4;
+
+}
+
+@keyframes scan{
+
+0%{
+top:0;
+}
+
+100%{
+top:100%;
+}
+
+}
+
+/* WARNING */
+
+#warning{
+
+position:fixed;
+
+inset:0;
+
+background:rgba(255,0,60,.2);
+
+display:none;
+
+pointer-events:none;
+
+animation:warn .5s infinite alternate;
+
+z-index:5;
+
+}
+
+@keyframes warn{
+
+from{
+opacity:0;
+}
+
+to{
+opacity:1;
+}
+
+}
+
+/* BAR */
+
+#bar{
+
+position:fixed;
+
+left:0;
+right:0;
+bottom:0;
+
+background:#000;
+
+border-top:2px solid var(--neon);
+
+z-index:200;
+
+}
+
+/* PANEL */
+
+.panel{
+
+display:grid;
+
+grid-template-columns:
+repeat(5,1fr);
+
+gap:5px;
+
+padding:5px;
+
+}
+
+/* BUTTONS */
+
+.panel button{
+
+height:50px;
+
+font-size:10px;
+
+}
+
+/* LOG */
+
+.log{
+
+display:flex;
+
+overflow-x:auto;
+
+height:120px;
+
+padding:5px;
+
+gap:8px;
+
+}
+
+/* CARD */
+
+.card{
+
+min-width:130px;
+
+background:#050505;
+
+border:1px solid var(--neon);
+
+padding:5px;
+
+font-size:9px;
+
+}
+
+.card img{
+
+width:100%;
+
+border:1px solid #222;
+
+margin-bottom:4px;
+
+}
+
+/* EFFECTS */
+
+.thermal{
+
+filter:
+contrast(2)
+saturate(3)
+hue-rotate(90deg)
+brightness(.8);
+
+}
+
+.night{
+
+filter:
+brightness(.7)
+contrast(1.8)
+saturate(.3)
+hue-rotate(50deg);
+
+}
+
+.glitch{
+
+animation:glitch .15s infinite;
+
+}
+
+@keyframes glitch{
+
+0%{
+transform:translate(1px,1px)
+}
+
+25%{
+transform:translate(-1px,0)
+}
+
+50%{
+transform:translate(1px,-1px)
+}
+
+75%{
+transform:translate(-1px,1px)
+}
+
+100%{
+transform:translate(0,0)
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- LOGIN -->
+
+<div id="login">
+
+<div class="login-box">
+
+<h1>B-L-N-D</h1>
+
+<p>ULTRA HACKER MATRIX</p>
+
+<input type="password"
+id="pass"
+placeholder="ACCESS KEY">
+
+<button onclick="login()">
+LOGIN
+</button>
+
+<div class="contact">
+
+IF YOU NEED PASSWORD:<br><br>
+
+INSTAGRAM:<br>
+mr.blndhassan<br><br>
+
+WHATSAPP:<br>
+07510369983
+
+</div>
+
+<button onclick="openIG()">
+INSTAGRAM
+</button>
+
+<button onclick="openWA()">
+WHATSAPP
+</button>
+
+</div>
+
+</div>
+
+<!-- EFFECTS -->
+
+<div id="warning"></div>
+
+<div id="scan"></div>
+
+<!-- VIDEO -->
+
+<video id="video"
+autoplay
+muted
+playsinline></video>
+
+<canvas id="canvas"></canvas>
+
+<!-- HUD -->
+
+<div id="hud">
+
+STATUS:
+<span id="status">ONLINE</span><br>
+
+FPS:
+<span id="fps">0</span><br>
+
+CAPTURE:
+<span id="count">0</span>/2000<br>
+
+CAM:
+<span id="camType">BACK</span><br>
+
+THERMAL:
+<span id="thermalText">OFF</span><br>
+
+BATTERY:
+<span id="battery">--</span><br>
+
+GPS:
+<span id="gps">--</span><br>
+
+TIME:
+<span id="clock">--</span>
+
+</div>
+
+<!-- TERMINAL -->
+
+<div id="terminal">
+
+> SYSTEM BOOTING...
+
+</div>
+
+<!-- RADAR -->
+
+<div id="radar"></div>
+
+<!-- BAR -->
+
+<div id="bar">
+
+<div class="panel">
+
+<button onclick="switchCamera()">
+SWITCH CAM
+</button>
+
+<button onclick="toggleThermal()">
+THERMAL
+</button>
+
+<button onclick="toggleNight()">
+NIGHT
+</button>
+
+<button onclick="toggleGlitch()">
+GLITCH
+</button>
+
+<button onclick="toggleSound()">
+SOUND
+</button>
+
+<button onclick="startRecording()">
+REC
+</button>
+
+<button onclick="stopRecording()">
+STOP
+</button>
+
+<button onclick="clearStorage()">
+CLEAR
+</button>
+
+<button onclick="openIG()">
+INSTAGRAM
+</button>
+
+<button onclick="openWA()">
+WHATSAPP
+</button>
+
+</div>
+
+<div class="log"
+id="log"></div>
+
+</div>
+
+<script>
+
+/* ELEMENTS */
+
+const video =
+document.getElementById("video");
+
+const canvas =
+document.getElementById("canvas");
+
+const ctx =
+canvas.getContext("2d");
+
+const log =
+document.getElementById("log");
+
+const terminal =
+document.getElementById("terminal");
+
+const fpsText =
+document.getElementById("fps");
+
+const countText =
+document.getElementById("count");
+
+const warning =
+document.getElementById("warning");
+
+const thermalText =
+document.getElementById("thermalText");
+
+const camType =
+document.getElementById("camType");
+
+/* STATE */
+
+let model;
+
+let ocrWorker;
+
+let stream;
+
+let recorder;
+
+let chunks=[];
+
+let front=false;
+
+let thermal=false;
+
+let sound=true;
+
+let stored=0;
+
+let cooldown=false;
+
+let lastFrame=performance.now();
+
+/* LOGIN */
+
+function login(){
+
+const pass =
+document.getElementById("pass").value;
+
+if(pass==="bhdr"){
+
+document.getElementById("login")
+.style.display="none";
+
+boot();
+
+}else{
+
+alert("ACCESS DENIED");
+
+}
+
+}
+
+/* LINKS */
+
+function openIG(){
+
+window.open(
+"https://instagram.com/mr.blndhassan",
+"_blank"
+);
+
+}
+
+function openWA(){
+
+window.open(
+"https://wa.me/9647510369983",
+"_blank"
+);
+
+}
+
+/* TERMINAL */
+
+function logTerminal(msg){
+
+terminal.innerHTML +=
+"<br>> "+msg;
+
+terminal.scrollTop =
+terminal.scrollHeight;
+
+}
+
+/* CLOCK */
+
+setInterval(()=>{
+
+const d =
+new Date();
+
+document.getElementById("clock")
+.innerHTML =
+d.toLocaleTimeString();
+
+},1000);
+
+/* BATTERY */
+
+if(navigator.getBattery){
+
+navigator.getBattery()
+.then(b=>{
+
+function updateBattery(){
+
+document.getElementById("battery")
+.innerHTML =
+Math.floor(
+b.level*100
+)+"%";
+
+}
+
+updateBattery();
+
+b.addEventListener(
+"levelchange",
+updateBattery
+);
+
+});
+
+}
+
+/* GPS */
+
+if(navigator.geolocation){
+
+navigator.geolocation
+.getCurrentPosition(pos=>{
+
+document.getElementById("gps")
+.innerHTML =
+pos.coords.latitude
+.toFixed(4)
++
+", "
++
+pos.coords.longitude
+.toFixed(4);
+
+});
+
+}
+
+/* SOUND */
+
+function beep(freq){
+
+if(!sound) return;
+
+const audio =
+new AudioContext();
+
+const osc =
+audio.createOscillator();
+
+const gain =
+audio.createGain();
+
+osc.frequency.value=freq;
+
+gain.gain.value=.03;
+
+osc.connect(gain);
+
+gain.connect(audio.destination);
+
+osc.start();
+
+setTimeout(()=>{
+osc.stop();
+},100);
+
+}
+
+function voice(text){
+
+if(!sound) return;
+
+const u =
+new SpeechSynthesisUtterance(text);
+
+u.rate=1;
+
+u.pitch=.8;
+
+speechSynthesis.speak(u);
+
+}
+
+function toggleSound(){
+
+sound=!sound;
+
+logTerminal(
+sound
+? "SOUND ON"
+: "SOUND OFF"
+);
+
+}
+
+/* CAMERA */
+
+async function startCamera(){
+
+if(stream){
+
+stream.getTracks()
+.forEach(t=>t.stop());
+
+}
+
+stream =
+await navigator.mediaDevices
+.getUserMedia({
+
+video:{
+
+facingMode:
+front
+? "user"
+: "environment",
+
+width:{ideal:1920},
+height:{ideal:1080}
+
+},
+
+audio:false
+
+});
+
+video.srcObject=stream;
+
+}
+
+async function switchCamera(){
+
+front=!front;
+
+await startCamera();
+
+camType.innerHTML =
+front
+? "FRONT"
+: "BACK";
+
+logTerminal(
+front
+? "FRONT CAMERA"
+: "BACK CAMERA"
+);
+
+beep(800);
+
+}
+
+/* EFFECTS */
+
+function toggleThermal(){
+
+thermal=!thermal;
+
+video.classList.toggle(
+"thermal"
+);
+
+thermalText.innerHTML =
+thermal
+? "ON"
+: "OFF";
+
+logTerminal(
+thermal
+? "THERMAL ON"
+: "THERMAL OFF"
+);
+
+}
+
+function toggleNight(){
+
+video.classList.toggle(
+"night"
+);
+
+logTerminal(
+"NIGHT MODE"
+);
+
+}
+
+function toggleGlitch(){
+
+video.classList.toggle(
+"glitch"
+);
+
+logTerminal(
+"GLITCH MODE"
+);
+
+}
+
+/* RECORD */
+
+function startRecording(){
+
+recorder =
+new MediaRecorder(stream);
+
+chunks=[];
+
+recorder.ondataavailable =
+e=>chunks.push(e.data);
+
+recorder.onstop=()=>{
+
+const blob =
+new Blob(chunks,{
+type:"video/mp4"
+});
+
+const url =
+URL.createObjectURL(blob);
+
+const a =
+document.createElement("a");
+
+a.href=url;
+
+a.download=
+"BLND_RECORD.mp4";
+
+a.click();
+
+};
+
+recorder.start();
+
+logTerminal(
+"RECORDING STARTED"
+);
+
+voice(
+"Recording started"
+);
+
+}
+
+function stopRecording(){
+
+if(recorder){
+
+recorder.stop();
+
+logTerminal(
+"RECORDING SAVED"
+);
+
+voice(
+"Recording saved"
+);
+
+}
+
+}
+
+/* DOWNLOAD */
+
+function downloadImage(data,id){
+
+const a =
+document.createElement("a");
+
+a.href=data;
+
+a.download=
+"BLND_CAPTURE_"+id+".jpg";
+
+a.click();
+
+logTerminal(
+"IMAGE DOWNLOADED"
+);
+
+}
+
+/* STORAGE */
+
+function clearStorage(){
+
+log.innerHTML="";
+
+stored=0;
+
+countText.innerHTML=0;
+
+logTerminal(
+"STORAGE CLEARED"
+);
+
+}
+
+/* OCR */
+
+async function scanPlate(x,y,w,h){
+
+if(cooldown) return;
+
+cooldown=true;
+
+const px =
+x+w*.2;
+
+const py =
+y+h*.65;
+
+const pw =
+w*.6;
+
+const ph =
+h*.2;
+
+ctx.strokeStyle=
+"#ff003c";
+
+ctx.lineWidth=2;
+
+ctx.strokeRect(
+px,py,pw,ph
+);
+
+const temp =
+document.createElement("canvas");
+
+temp.width=500;
+temp.height=180;
+
+const tctx =
+temp.getContext("2d");
+
+tctx.drawImage(
+video,
+px,py,pw,ph,
+0,0,500,180
+);
+
+const imgData =
+tctx.getImageData(
+0,0,500,180
+);
+
+const data =
+imgData.data;
+
+for(let i=0;i<data.length;i+=4){
+
+const avg =
+(data[i]+
+data[i+1]+
+data[i+2])/3;
+
+const val =
+avg>115
+?255
+:0;
+
+data[i]=val;
+data[i+1]=val;
+data[i+2]=val;
+
+}
+
+tctx.putImageData(
+imgData,
+0,
+0
+);
+
+try{
+
+const result =
+await ocrWorker
+.recognize(temp);
+
+let text =
+result.data.text
+.replace(/[^A-Z0-9-]/gi,"")
+.trim();
+
+if(text.length<4){
+
+text="UNREADABLE";
+
+}else{
+
+voice(
+"Vehicle detected"
+);
+
+}
+
+capture(
+temp,
+"PLATE: "+text
+);
+
+logTerminal(
+"PLATE: "+text
+);
+
+}catch(e){
+
+logTerminal(
+"OCR ERROR"
+);
+
+}
+
+setTimeout(()=>{
+cooldown=false;
+},1500);
+
+}
+
+/* SAVE */
+
+function capture(img,text){
+
+if(stored>=2000)
+return;
+
+stored++;
+
+countText.innerHTML=
+stored;
+
+if(log.children.length>200){
+
+log.removeChild(
+log.lastChild
+);
+
+}
+
+const data =
+img.toDataURL(
+"image/jpeg",
+0.9
+);
+
+const card =
+document.createElement("div");
+
+card.className="card";
+
+card.innerHTML=`
+
+<img src="${data}">
+
+<div>ID: #${stored}</div>
+
+<div>${text}</div>
+
+<button onclick="
+downloadImage(
+'${data}',
+${stored}
+)">
+DOWNLOAD
+</button>
+
+`;
+
+log.prepend(card);
+
+}
+
+/* PERSON */
+
+function capturePerson(){
+
+if(cooldown) return;
+
+cooldown=true;
+
+const temp =
+document.createElement("canvas");
+
+temp.width=220;
+temp.height=160;
+
+temp.getContext("2d")
+.drawImage(
+video,
+0,
+0,
+220,
+160
+);
+
+capture(
+temp,
+"PERSON DETECTED"
+);
+
+voice(
+"Person detected"
+);
+
+setTimeout(()=>{
+cooldown=false;
+},1200);
+
+}
+
+/* FPS */
+
+function updateFPS(){
+
+const now=
+performance.now();
+
+const fps=
+Math.round(
+1000/
+(now-lastFrame)
+);
+
+lastFrame=now;
+
+fpsText.innerHTML=fps;
+
+}
+
+/* DETECT */
+
+async function detectLoop(){
+
+updateFPS();
+
+const predictions =
+await model.detect(video);
+
+ctx.clearRect(
+0,
+0,
+canvas.width,
+canvas.height
+);
+
+let biggest=0;
+
+predictions.forEach(p=>{
+
+const[x,y,w,h]=
+p.bbox;
+
+ctx.strokeStyle=
+"#00ff41";
+
+ctx.lineWidth=3;
+
+ctx.strokeRect(
+x,y,w,h
+);
+
+ctx.fillStyle=
+"#00ff41";
+
+ctx.font=
+"14px monospace";
+
+ctx.fillText(
+p.class.toUpperCase(),
+x,
+y-5
+);
+
+const area=w*h;
+
+if(area>biggest)
+biggest=area;
+
+logTerminal(
+"SCAN: "+p.class
+);
+
+/* PERSON */
+
+if(p.class==="person"){
+
+beep(700);
+
+capturePerson();
+
+}
+
+/* VEHICLES */
+
+if(
+p.class==="car"||
+p.class==="truck"||
+p.class==="bus"
+){
+
+beep(300);
+
+scanPlate(x,y,w,h);
+
+}
+
+});
+
+/* ALERT */
+
+const limit =
+canvas.width*
+canvas.height*
+0.35;
+
+if(biggest>limit){
+
+warning.style.display=
+"block";
+
+beep(120);
+
+}else{
+
+warning.style.display=
+"none";
+
+}
+
+requestAnimationFrame(
+detectLoop
+);
+
+}
+
+/* BOOT */
+
+async function boot(){
+
+logTerminal(
+"LOADING AI..."
+);
+
+model =
+await cocoSsd.load();
+
+ocrWorker =
+await Tesseract
+.createWorker("eng");
+
+await ocrWorker
+.setParameters({
+
+tessedit_pageseg_mode:7,
+
+tessedit_char_whitelist:
+'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-',
+
+preserve_interword_spaces:'1'
+
+});
+
+logTerminal(
+"OCR READY"
+);
+
+await startCamera();
+
+video.onloadedmetadata=()=>{
+
+video.play();
+
+canvas.width =
+window.innerWidth;
+
+canvas.height =
+window.innerHeight;
+
+detectLoop();
+
+};
+
+logTerminal(
+"SYSTEM ONLINE"
+);
+
+voice(
+"System online"
+);
+
+}
+
+/* ENTER */
+
+document
+.getElementById("pass")
+.addEventListener(
+"keyup",
+e=>{
+
+if(e.key==="Enter")
+login();
+
+}
+);
+
+</script>
+
+</body>
+</html>
